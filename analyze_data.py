@@ -72,7 +72,7 @@ def plot_smooth(df, name):
         plt.show()
 
 
-games_paths = {"Azul":"azul_leaderboard.csv", "Quoridor":"Quoridor_full_leaderboard.csv"}
+games_paths = {"Azul":"azul_leaderboard.csv", "Quoridor":"Quoridor_full_leaderboard.csv", "RaceForTheGalaxy":"RaceForTheGalaxy_full_leaderboard.csv"}
 
 for game in games_paths.keys():
     # Load the CSV data into a DataFrame

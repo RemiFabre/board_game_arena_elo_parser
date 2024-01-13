@@ -11,9 +11,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-games_paths = {"Azul":"https://en.boardgamearena.com/gamepanel?game=azul", "Quoridor":"https://boardgamearena.com/gamepanel?game=quoridor"}
+games_paths = {"Azul":"https://en.boardgamearena.com/gamepanel?game=azul", "Quoridor":"https://boardgamearena.com/gamepanel?game=quoridor", "RaceForTheGalaxy":"https://boardgamearena.com/gamepanel?game=raceforthegalaxy"}
 
-game = "Quoridor"
+game = "RaceForTheGalaxy"
 def scrape_azul_leaderboard():
     try :
         # Setup WebDriver
@@ -114,7 +114,8 @@ def scrape_azul_leaderboard():
             # print("Clicking the 'Next' button using JavaScript...")
             driver.execute_script("arguments[0].click();", next_button)
             time.sleep(0.01) # just in case
-
+    except Exception as e:
+        print(e)
     finally:
         print("Remove duplicates (keeping the highest ELO if names are the same)...")
         unique_players = {}
@@ -134,7 +135,7 @@ def scrape_azul_leaderboard():
 
         print(f"Anomalies found: {anomalies}")
         
-        csv_file_name = f'{game}_full_leaderboard_test.csv'
+        csv_file_name = f'{game}_full_leaderboard.csv'
         print(f"Writing to file {csv_file_name}")
         
         with open(csv_file_name, 'w', newline='', encoding='utf-8') as file:
