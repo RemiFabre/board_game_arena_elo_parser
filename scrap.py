@@ -16,9 +16,10 @@ games_paths = {
     "Quoridor": "https://boardgamearena.com/gamepanel?game=quoridor",
     "RaceForTheGalaxy": "https://boardgamearena.com/gamepanel?game=raceforthegalaxy",
     "Yatzy": "https://boardgamearena.com/gamepanel?game=yatzy",
+    "Patchwork": "https://boardgamearena.com/gamepanel?game=patchwork",
 }
 
-game = "Yatzy"
+game = "Patchwork"
 
 
 def scrape_azul_leaderboard():

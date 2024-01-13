@@ -11,4 +11,8 @@ Plots:
 
 ![Yatzy_all_smooth_elo_distribution.png](Yatzy_all_smooth_elo_distribution.png)
 
+![Patchwork_all_smooth_elo_distribution.png](Patchwork_all_smooth_elo_distribution.png)
+
+
+
 <!-- ![Quoridor_smooth_elo_distribution.png](Quoridor_smooth_elo_distribution.png) -->

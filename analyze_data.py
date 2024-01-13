@@ -93,6 +93,7 @@ games_paths = {
     "Quoridor": "Quoridor_full_leaderboard.csv",
     "RaceForTheGalaxy": "RaceForTheGalaxy_full_leaderboard.csv",
     "Yatzy": "Yatzy_full_leaderboard.csv",
+    "Patchwork": "Patchwork_full_leaderboard.csv",
 }
 
 
@@ -101,7 +102,7 @@ for game in games_paths.keys():
     # df = pd.read_csv('')
     df = pd.read_csv(games_paths[game])
     # Example usage of the functions
-    elo_input = 716
+    elo_input = 700
     percentile_output = calculate_percentile_given_elo(elo_input)
     print(f"Percentile of players with ELO > {elo_input}: {percentile_output:.2f}%")
     percent_input = 20
