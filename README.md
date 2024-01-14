@@ -85,11 +85,6 @@ python update_readme.py
 ![SevenWondersDuel_all_elo_distribution.png](./results/SevenWondersDuel_all_elo_distribution.png)
 **SevenWondersDuel elo distribution**
 ![SevenWondersDuel_elo_distribution.png](./results/SevenWondersDuel_elo_distribution.png)
-### Splendor
-**Splendor all elo distribution**
-![Splendor_all_elo_distribution.png](./results/Splendor_all_elo_distribution.png)
-**Splendor elo distribution**
-![Splendor_elo_distribution.png](./results/Splendor_elo_distribution.png)
 ### TicketToRide
 **TicketToRide all elo distribution**
 ![TicketToRide_all_elo_distribution.png](./results/TicketToRide_all_elo_distribution.png)
