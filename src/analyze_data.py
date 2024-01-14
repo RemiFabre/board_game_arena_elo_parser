@@ -313,5 +313,5 @@ def compare_games():
     compare_distributions(df1, df2, game1, game2, show_plots=True)
 
 
-# plot_all_games()
-compare_games()
+plot_all_games()
+# compare_games()
