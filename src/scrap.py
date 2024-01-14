@@ -30,8 +30,7 @@ games_paths = {
 
 # List of game names to scrape
 list_of_games = [
-    "TicketToRide",
-    # "Splendor",
+    "Splendor",
 ]
 
 
