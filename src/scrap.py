@@ -3,7 +3,7 @@ import time
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -17,15 +17,28 @@ games_paths = {
     "RaceForTheGalaxy": "https://boardgamearena.com/gamepanel?game=raceforthegalaxy",
     "Yatzy": "https://boardgamearena.com/gamepanel?game=yatzy",
     "Patchwork": "https://boardgamearena.com/gamepanel?game=patchwork",
+    "SevenWondersDuel": "https://boardgamearena.com/gamepanel?game=sevenwondersduel",
+    "SevenWonders": "https://boardgamearena.com/gamepanel?game=sevenwonders",
+    "ArkNova": "https://boardgamearena.com/gamepanel?game=arknova",
+    "Catan": "https://boardgamearena.com/gamepanel?game=catan",
+    "Wingspan": "https://boardgamearena.com/gamepanel?game=wingspan",
+    "TicketToRide": "https://boardgamearena.com/gamepanel?game=tickettoride",
+    "Carcassonne": "https://boardgamearena.com/gamepanel?game=carcassonne",
+    "Splendor": "https://boardgamearena.com/gamepanel?game=splendor",
+    "Agricola": "https://boardgamearena.com/gamepanel?game=agricola",
 }
 
-game = "Patchwork"
+# List of game names to scrape
+list_of_games = [
+    "TicketToRide",
+    # "Splendor",
+]
 
 
-def scrape_azul_leaderboard():
+def scrape_leaderboard(game):
     try:
         # Setup WebDriver
-        print("Setting up WebDriver...")
+        print(f"Setting up WebDriver for game {game}...")
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service)
 
@@ -79,32 +92,40 @@ def scrape_azul_leaderboard():
         # Scrape data until a condition is met
         player_data = []
         prev_first_player = None
+        nb_players = 0
+        consecutive_errors = 0
+        elo = 100000000
         while True:
-            # Parse page content with BeautifulSoup
-            print("Parsing page content...")
-            soup = BeautifulSoup(driver.page_source, "html.parser")
-
-            # print("Finding the 'Next' button...")
-            next_button = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//div[contains(text(), 'Next')]")
-                )
-            )
-
-            # Find player data
-            # print("Finding player data...")
-            found_10 = False
-            first_loop = True
-            consecutive_errors = 0
-            while not found_10:  # Sometimes it didn't load well
-                if consecutive_errors > 4:
-                    print(
-                        "WARNING: Too many consecutive errors, this is only OK if it's the last page"
+            if consecutive_errors > 4 and int(elo) == 0:
+                print("Reached the end of the leaderboard. Exiting...")
+                break
+            try:
+                # Parse page content with BeautifulSoup
+                # print("Parsing page content...")
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_all_elements_located(
+                        (By.CLASS_NAME, "bga-ranking-entry")
                     )
+                )
+                soup = BeautifulSoup(driver.page_source, "html.parser")
 
-                if not first_loop:
-                    time.sleep(0.01)
-                first_loop = False
+                # print("Finding the 'Next' button...")
+                next_button = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, "//div[contains(text(), 'Next')]")
+                    )
+                )
+            except StaleElementReferenceException as e:
+                print(
+                    "Encountered a stale element reference. Refreshing and retrying..."
+                )
+                # driver.refresh()  # Refresh the page to avoid stale element reference
+                continue
+
+                # Find player data
+                # print("Finding player data...")
+
+            try:
                 players = soup.find_all(
                     "div", class_="bga-ranking-entry"
                 )  # Container for each player
@@ -114,13 +135,23 @@ def scrape_azul_leaderboard():
                         players[0].find("a", class_="playername").text.strip()
                     )
                     if first_player != prev_first_player:
-                        found_10 = True
+                        # Only valid configuration
+                        prev_first_player = first_player
                     else:
                         print("WARNING: duplicate view, waiting for refresh...")
                         consecutive_errors += 1
+                        continue
                 else:
-                    print("WARNING: no 10 players found")
+                    print("WARNING: no 10 players found. instead found: ", len(players))
+                    print(f"players: {players}")
                     consecutive_errors += 1
+                    continue
+            except StaleElementReferenceException as e:
+                print(
+                    "Encountered a stale element reference (second block). Refreshing and retrying..."
+                )
+                # driver.refresh()  # Refresh the page to avoid stale element reference
+                continue
 
             for player in players:
                 # print("Reading player data...")
@@ -135,12 +166,15 @@ def scrape_azul_leaderboard():
                 elo = elo_tag.text.strip() if elo_tag else "ELO not found"
                 # print(f"ELO: {elo}")
                 player_data.append([name, int(elo)])
+                nb_players += 1
+            print(f"nb_players: {nb_players}, latest player: {name} ELO: {elo}")
 
             # print("Clicking the 'Next' button using JavaScript...")
             driver.execute_script("arguments[0].click();", next_button)
+            consecutive_errors = 0
             time.sleep(0.01)  # just in case
     except Exception as e:
-        print(e)
+        print(f"Exception: {e}")
     finally:
         print("Remove duplicates (keeping the highest ELO if names are the same)...")
         unique_players = {}
@@ -161,8 +195,9 @@ def scrape_azul_leaderboard():
         sorted_player_data = [[name, elo] for name, elo in sorted_players]
 
         print(f"Anomalies found: {anomalies}")
+        print(f"Unique players found: {len(sorted_player_data)}")
 
-        csv_file_name = f"{game}_full_leaderboard.csv"
+        csv_file_name = f"../leaderboards/{game}_full_leaderboard.csv"
         print(f"Writing to file {csv_file_name}")
 
         with open(csv_file_name, "w", newline="", encoding="utf-8") as file:
@@ -178,4 +213,5 @@ def scrape_azul_leaderboard():
         driver.quit()
 
 
-scrape_azul_leaderboard()
+for game in list_of_games:
+    scrape_leaderboard(game)

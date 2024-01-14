@@ -1,10 +1,9 @@
 import os
 
-results_folder = "./results/"
+results_folders = ["./results/", "./comparison_results/"]
 readme_file_path = "./README.md"
 
 
-# This function reads the current README.md file and replaces the "# Results" section
 def update_readme_with_images(readme_path, results_path):
     print("Read the current README contents")
     with open(readme_path, "r") as file:
@@ -46,4 +45,5 @@ def update_readme_with_images(readme_path, results_path):
         file.writelines(readme_contents)
 
 
-update_readme_with_images(readme_file_path, results_folder)
+for results_folder in results_folders:
+    update_readme_with_images(readme_file_path, results_folder)
