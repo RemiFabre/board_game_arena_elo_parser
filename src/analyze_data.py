@@ -1,5 +1,3 @@
-# First, let's write a code snippet to read the CSV file and calculate the ELO distribution along with the percentile thresholds.
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -37,7 +35,7 @@ def plot_rough(df, percentiles):
     plt.show()
 
 
-def plot_smooth(df, name):
+def plot_smooth(df, name, show_plots=False):
     elo_starts = [0, 100]
     for elo_start in elo_starts:
         plt.figure(figsize=(12, 6))
@@ -82,18 +80,19 @@ def plot_smooth(df, name):
         plt.grid(True)
         plt.tight_layout()
         if elo_start == 0:
-            plt.savefig(f"./{name}_all_smooth_elo_distribution.png")
+            plt.savefig(f"../results/{name}_all_elo_distribution.png")
         else:
-            plt.savefig(f"./{name}_smooth_elo_distribution.png")
-        plt.show()
+            plt.savefig(f"../results/{name}_elo_distribution.png")
+        if show_plots:
+            plt.show()
 
 
 games_paths = {
-    "Azul": "azul_leaderboard.csv",
-    "Quoridor": "Quoridor_full_leaderboard.csv",
-    "RaceForTheGalaxy": "RaceForTheGalaxy_full_leaderboard.csv",
-    "Yatzy": "Yatzy_full_leaderboard.csv",
-    "Patchwork": "Patchwork_full_leaderboard.csv",
+    "Azul": "../leaderboards/azul_leaderboard.csv",
+    "Quoridor": "../leaderboards/Quoridor_full_leaderboard.csv",
+    "RaceForTheGalaxy": "../leaderboards/RaceForTheGalaxy_full_leaderboard.csv",
+    "Yatzy": "../leaderboards/Yatzy_full_leaderboard.csv",
+    "Patchwork": "../leaderboards/Patchwork_full_leaderboard.csv",
 }
 
 
@@ -110,4 +109,4 @@ for game in games_paths.keys():
     print(f"ELO threshold for the top {percent_input}% of players: {elo_output:.2f}")
 
     # plot_rough(df, percentiles)
-    plot_smooth(df, game)
+    plot_smooth(df, game, show_plots=False)
