@@ -1,4 +1,6 @@
 import csv
+import os
+from pathlib import Path
 import time
 
 from bs4 import BeautifulSoup
@@ -10,6 +12,33 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+
+
+def _resolve_driver_path(raw_path: str) -> str:
+    """Ensure webdriver_manager gives us the actual chromedriver binary."""
+    candidate = Path(raw_path)
+    # If webdriver_manager already returned the chromedriver binary, just reuse it.
+    if candidate.is_file() and candidate.name == "chromedriver":
+        if not os.access(candidate, os.X_OK):
+            candidate.chmod(candidate.stat().st_mode | 0o111)
+        return str(candidate)
+
+    # webdriver_manager sometimes returns one of the NOTICE files; prefer chromedriver nearby.
+    search_roots = [candidate.parent, candidate.parent.parent]
+    if candidate.suffix == ".zip":
+        search_roots.append(candidate.with_suffix(""))
+
+    for root in search_roots:
+        possible = root / "chromedriver"
+        if possible.is_file():
+            if not os.access(possible, os.X_OK):
+                # webdriver_manager sometimes leaves chromedriver non-executable.
+                possible.chmod(possible.stat().st_mode | 0o111)
+            return str(possible)
+
+    raise FileNotFoundError(
+        f"Unable to locate a usable chromedriver binary near {raw_path}."
+    )
 
 games_paths = {
     "Azul": "https://en.boardgamearena.com/gamepanel?game=azul",
@@ -30,15 +59,19 @@ games_paths = {
 
 # List of game names to scrape
 list_of_games = [
-    "Splendor",
+    # "Splendor",
+    "ArkNova",
 ]
 
 
 def scrape_leaderboard(game):
+    player_data = []
+    driver = None
     try:
         # Setup WebDriver
         print(f"Setting up WebDriver for game {game}...")
-        service = Service(ChromeDriverManager().install())
+        driver_path = _resolve_driver_path(ChromeDriverManager().install())
+        service = Service(driver_path)
         driver = webdriver.Chrome(service=service)
 
         # Open the website
@@ -89,7 +122,6 @@ def scrape_leaderboard(game):
         time.sleep(1.0)
 
         # Scrape data until a condition is met
-        player_data = []
         prev_first_player = None
         nb_players = 0
         consecutive_errors = 0
@@ -206,10 +238,11 @@ def scrape_leaderboard(game):
                 writer.writerow([name, elo])
 
         # Close the WebDriver
-        print("Finished, sleeping for ever...")
-        time.sleep(100000)
-        print("Closing WebDriver...")
-        driver.quit()
+        if driver:
+            print("Finished, sleeping for ever...")
+            time.sleep(100000)
+            print("Closing WebDriver...")
+            driver.quit()
 
 
 for game in list_of_games:

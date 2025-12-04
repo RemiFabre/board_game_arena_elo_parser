@@ -1,25 +1,43 @@
 # Usage
-To download a leaderboard, update the dictionnary "games_paths" with the paths of the games if they are not included yet.
-Then add the list of games to be downloaded to the list "list_of_games", then:
-```
-cd src
-python3 scrap.py
-```
 
-To generate individual plots, call plot_all_games() in:
-```
-cd src
-python3 analyze_data.py
-```
+## Setup
+1. Install Google Chrome (or Chrome for Testing) locally.
+2. Create and activate a virtual environment (optional but recommended).
+3. Install the Python dependencies:
+   ```
+   pip install selenium webdriver-manager beautifulsoup4 matplotlib numpy pandas seaborn
+   ```
 
-To generate comparison plots, call compare_games() in:
-```
-cd src
-python3 analyze_data.py
-```
+## Download leaderboard data
+1. Edit `src/scrap.py`:
+   - Add any missing games in the `games_paths` dictionary.
+   - Add the games you want to scrape to `list_of_games`.
+2. Run the scraper:
+   ```
+   cd src
+   python scrap.py
+   ```
 
-To regenerate this README, erase everything below "Results" and run:
+This opens a Chrome window via Selenium, navigates to each Board Game Arena leaderboard and downloads the “All-time” ranking. Results are stored as CSV files inside `leaderboards/<Game>_full_leaderboard.csv`.
 
+### Troubleshooting
+- **ChromeDriver download issues** – `webdriver_manager` downloads the right binary automatically, but it needs internet access and a locally installed Chrome version. If the machine cannot reach Google’s endpoints you will need to download the matching driver manually and place it inside `~/.wdm/drivers/`.
+- **Exec format errors / THIRD_PARTY_NOTICES** – if a previous webdriver download cached only notice files, delete the stale folder inside `~/.wdm/drivers/chromedriver/` and re-run the scraper so a fresh executable can be fetched.
+
+## Plot and compare results
+`src/analyze_data.py` contains helpers to render smooth histograms of the collected CSV files.
+
+- Generate figures for each game:
+  ```
+  cd src
+  python analyze_data.py
+  ```
+  (call `plot_all_games()` / `compare_games()` as needed inside the script.)
+
+- Comparison graphics are written to `comparison_results/` while single-game plots live in `results/`.
+
+## Update this README’s gallery
+Regenerate the “Results” section after producing plots by running:
 ```
 python update_readme.py
 ```
